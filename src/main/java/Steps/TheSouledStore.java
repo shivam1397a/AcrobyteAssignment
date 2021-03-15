@@ -11,16 +11,15 @@ import java.util.concurrent.TimeUnit;
 import com.vimalselvam.cucumber.listener.Reporter;
 import cucumber.api.PendingException;
 import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import ru.yandex.qatools.ashot.*;
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
@@ -90,18 +89,16 @@ public class TheSouledStore {
 
     @And("^I select last available product$")
     public void iSelectLastAvailableProduct() throws Throwable {
+        WebDriverWait wait = new WebDriverWait(driver, 5);
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//ul[li[contains(text(),'Pages')]])[1]")));
         int pages=driver.findElements(By.xpath("(//ul[li[contains(text(),'Pages')]])[1]/li")).size();
-        driver.findElement(By.xpath("/(//ul[li[contains(text(),'Pages')]])[1]/li["+pages+"]/span")).click();
+        driver.findElement(By.xpath("(//ul[li[contains(text(),'Pages')]])[1]/li["+pages+"]/span")).click();
         Reporter.addStepLog("Navigated to last page");
-        int productcount=driver.findElements(By.xpath("(//div[@class='productlist']//img")).size();
-        for (int i=productcount;i>0;i--){
-            if (driver.findElement(By.xpath("(//div[@class='productlist']//img)["+i+"]/following-sibling::div[@class='souledout']")).isDisplayed()){
-
-            }else{
-                driver.findElement(By.xpath("(//div[@class='productlist']//img)["+i+"]")).click();
-                break;
-            }
-        }
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//div[@class='productlist']//img)[1]")));
+        int productcount=driver.findElements(By.xpath("//div[@class='productlist']//img")).size();
+        int soldoutcount=driver.findElements(By.xpath("//div[@class='productlist']//img/following-sibling::div[@class='souledout']")).size();
+        JavascriptExecutor executor = (JavascriptExecutor)driver;
+        executor.executeScript("arguments[0].click();", driver.findElement(By.xpath("(//div[@class='productlist']//img)["+(productcount-soldoutcount)+"]")));
         Reporter.addStepLog("Navigated to last available product");
         getscreenshot();
         Reporter.addScreenCaptureFromPath(TheSouledStore.destinationPath.toString());
@@ -109,6 +106,8 @@ public class TheSouledStore {
 
     @And("^I select \"([^\"]*)\" size and \"([^\"]*)\" quantity$")
     public void iSelectSizeAndQuantity(String size, String quantity) throws Throwable {
+        WebDriverWait wait = new WebDriverWait(driver, 5);
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//li[label[span[text()='"+size+"']]]//input")));
         driver.findElement(By.xpath("//li[label[span[text()='"+size+"']]]//input")).click();
         Select quants = new Select(driver.findElement(By.className("qtyOption")));
         quants.selectByVisibleText(quantity);
@@ -119,7 +118,7 @@ public class TheSouledStore {
 
     @Then("^I verify that product is added successfully$")
     public void iVerifyThatProductIsAddedSuccessfully() throws Throwable {
-        Assert.assertEquals(driver.findElement(By.xpath("//div[text()='Size: ']/span")).getText(),"M");
+        Assert.assertEquals(driver.findElement(By.xpath("//div[text()='Size: ']/span")).getText(),"S");
 
     }
 }
