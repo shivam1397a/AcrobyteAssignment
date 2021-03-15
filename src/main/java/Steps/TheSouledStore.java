@@ -6,10 +6,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import com.vimalselvam.cucumber.listener.Reporter;
 import cucumber.api.PendingException;
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -53,12 +55,11 @@ public class TheSouledStore {
 
     public static File destinationPath;
 
-    public void getscreenshot() throws IOException
-    {
-//        Screenshot screenshot = new AShot().shootingStrategy(ShootingStrategies.viewportPasting(1000)).takeScreenshot(driver);
-        Screenshot screenshot = new AShot().coordsProvider(new WebDriverCoordsProvider()).takeScreenshot(driver);
-        destinationPath = new File(System.getProperty("user.dir") + "/target/cucumber-reports/screenshot"+System.currentTimeMillis()+".jpg");
-        ImageIO.write(screenshot.getImage(), "jpg", destinationPath);
+    public void getscreenshot() throws IOException, InterruptedException {
+        File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+        destinationPath = new File(System.getProperty("user.dir") + "/target/cucumber-reports/screenshot" + System.currentTimeMillis() + ".jpg");
+        FileUtils.copyFile(scrFile, destinationPath);
+        Thread.sleep(2000L);
     }
 
     @And("^I click on \"([^\"]*)\" button$")
