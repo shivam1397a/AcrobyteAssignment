@@ -29,6 +29,7 @@ import javax.imageio.ImageIO;
 
 public class TheSouledStore {
     WebDriver driver;
+    public static String productname;
 
     @Given("^I navigate to TheSouledStore home page in \"([^\"]*)\" browser$")
     public void iNavigateToTheSouledStoreHomePageInBrowser(String browser) throws Throwable {
@@ -100,6 +101,8 @@ public class TheSouledStore {
         int soldoutcount=driver.findElements(By.xpath("//div[@class='productlist']//img/following-sibling::div[@class='souledout']")).size();
         JavascriptExecutor executor = (JavascriptExecutor)driver;
         executor.executeScript("arguments[0].click();", driver.findElement(By.xpath("(//div[@class='productlist']//img)["+(productcount-soldoutcount)+"]")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@class='productinfo']//h1")));
+        productname=driver.findElement(By.xpath("//div[@class='productinfo']//h1")).getText();
         Reporter.addStepLog("Navigated to last available product");
         getscreenshot();
         Reporter.addScreenCaptureFromPath(TheSouledStore.destinationPath.toString());
@@ -119,7 +122,10 @@ public class TheSouledStore {
 
     @Then("^I verify that product is added successfully$")
     public void iVerifyThatProductIsAddedSuccessfully() throws Throwable {
+        Assert.assertEquals(driver.findElement(By.xpath("//a[text()='Solids: Salmon']")).isDisplayed(),true);
         Assert.assertEquals(driver.findElement(By.xpath("//div[text()='Size: ']/span")).getText(),"S");
-
+        Reporter.addStepLog("Selected object is present");
+        getscreenshot();
+        Reporter.addScreenCaptureFromPath(TheSouledStore.destinationPath.toString());
     }
 }
